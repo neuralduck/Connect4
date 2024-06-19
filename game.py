@@ -43,6 +43,7 @@ class Game:
 		self.width = 700
 		self.height = 600
 		self.screen = pg.display.set_mode((self.width, self.height))
+		pg.display.set_caption('Connect 4')
 		self.fps = 60
 		self.timer = pg.time.Clock()
 
@@ -82,8 +83,15 @@ class Game:
 					ball.draw(self.screen)
 					ball.update_pos(n)
 			result, start, end = self.board.check(True)
-			print(result, start, end)
+			#print(result, start, end)
+			
+			#pg.draw.rect(self.screen, 'black', mouse_circle)
 			if not self.game_over:
+				pg.mouse.set_visible(False)
+				if not self.turn:
+					mouse_circle = pg.draw.circle(self.screen, self.p1_color, pg.mouse.get_pos(), 40)
+				else:
+					mouse_circle = pg.draw.circle(self.screen, self.p2_color, pg.mouse.get_pos(), 40)
 				if result == 1:
 					print('Player 1 wins')
 					self.game_over = True
@@ -94,7 +102,8 @@ class Game:
 					print('Draw')
 					self.game_over = True
 			else:
-				print('game over')
+				#print('game over')
+				pg.mouse.set_visible(True)
 				if (start != None) and (end != None):
 					start = list(map(self.board2grid, start))[::-1]
 					end = list(map(self.board2grid, end))[::-1]
@@ -106,17 +115,20 @@ class Game:
 			for event in pg.event.get():
 				if event.type == pg.QUIT:
 					self.running = False
+				
 				if (event.type == pg.MOUSEBUTTONUP) and not(self.game_over):
-					x, _ = pg.mouse.get_pos()
+					x, y = pg.mouse.get_pos()
 					x = 100*(x//100)+(50)
+					y = (100*(y//100)+50)-(len(self.on_screen[x])%6)*100
+					#y = 0
 					#print(x)
 					self.last_played = x
 					if len(self.on_screen[x]) < 6:
 						if self.turn:
-							self.on_screen[x].append(Ball(x, 0, self.p2_color))
+							self.on_screen[x].append(Ball(x, y, self.p2_color))
 							self.board.move(int((x-50)/100), -1)
 						else:
-							self.on_screen[x].append(Ball(x, 0, self.p1_color))
+							self.on_screen[x].append(Ball(x, y, self.p1_color))
 							self.board.move(self.grid2board(x), 1)
 						self.turn = int(not(self.turn))
 			pg.display.update()
