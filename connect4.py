@@ -6,9 +6,11 @@ class ConnectFour:
 		self.symbol1 = '\N{WHITE CIRCLE}'
 		self.symbol2 = '\N{BLACK CIRCLE}'
 		self.move_count = {i: 0 for i in range(7)}
+
 	def __str__(self):
 		board_str = ''
 		get_symbol = lambda x: f'{self.symbol1}' if x == 1 else f'{self.symbol2}' if x == -1 else ' '
+		#get_symbol = lambda x: f'{1}' if x == 1 else f'{-1}' if x == -1 else ' '
 		dash = '\N{Horizontal Bar}'
 		board_str += '| '+' | '.join(list(map(str, range(7))))+' |'+'\n'
 		board_str += '-'*29+'\n'
@@ -24,7 +26,30 @@ class ConnectFour:
 					self.board[cell][column] = mark
 					self.move_count[column] += 1
 					break
-
+	def value(self):
+		def calculate_value(player):
+			total_value = 0
+			for choice in self.available_moves():
+				directions = {'u': (-1, 0), 'd': (1, 0), 'r': (0, 1), 'l': (0, -1), 'ur': (-1, 1), 'ul': (-1, -1), 'dr': (1, 1), 'dl': (1, -1)}
+				lines = {'u': 0, 'd': 0, 'r': 0, 'l': 0, 'ur': 0, 'ul': 0, 'dr': 0, 'dl': 0}
+				i = 5 - self.move_count[choice]
+				j = choice
+				for dir in directions:
+					m, n = directions[dir]
+					for t in (1, 2, 3):
+						if (0<=(i+t*m)<=5) and (0<=(j+t*n)<=6):
+							if (self.board[i+t*m][j+t*n] == player):
+								lines[dir] += 1
+							else:
+								break
+				choice_value = sum(map(lambda x: x*100 if x == 3 else x*5 if x == 2 else x if x == 1 else 0, filter(lambda x: x>0, lines.values())))
+				total_value += choice_value
+			return total_value * player
+		
+		p1 = calculate_value(player = 1)
+		p2 = calculate_value(player = -1)
+		return p1 + p2
+	
 	def available_moves(self):
 		#returns a list of column numbers with empty cells
 		return list(map(lambda x: x[0], filter(lambda x: True if x[1] < 6 else False, self.move_count.items())))
@@ -128,6 +153,7 @@ if __name__ == '__main__':
 	player2 = -1
 	while True:
 		info()
+		print(board.value())
 		if turn:
 			choice = int(input(f"Player 1 choice ({board.symbol1}): "))
 		else:
