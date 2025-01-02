@@ -2,7 +2,9 @@ import os
 
 class ConnectFour:
 	def __init__(self):
-		self.board = [[0 for _ in range(7)] for _ in range(6)]
+		self.rows: int = 6
+		self.columns: int = 7
+		self.board = [[0 for _ in range(self.columns)] for _ in range(self.rows)]
 		self.symbol1 = '\N{WHITE CIRCLE}'
 		self.symbol2 = '\N{BLACK CIRCLE}'
 		self.move_count = {i: 0 for i in range(7)}
@@ -58,89 +60,30 @@ class ConnectFour:
 		#number of empty cells in the board, for draw and game over checks
 		return 42 - sum(self.move_count.values())
 
-	def check(self, index = False):
+	def check(self):
 		# +1 player 1 | -1 player 2 | 0 draw | 3 game not over
 		if self.num_cells() == 0:
-			#draw
-			if index:
-				return [0, None, None]
 			return 0
-		for i in range(6):
-			for j in range(7):
-				if abs(self.board[i][j]) == 1:
-					RIGHT = (j+3 <= 6)
-					LEFT = (j-3 >= 0)
-					UP = (i-3 >= 0)
-					DOWN = (i+3 <= 5)
-					if RIGHT:
-						right = 0
-						for n in range(4):
-							right += self.board[i][j+n]
-						if abs(right) == 4:
-							if index:
-								return [int(right/4),(i, j), (i, j+3)]
-							return int(right/4)
-						if UP:
-							right_up = 0
-							for n in range(4):
-								right_up += self.board[i-n][j+n]
-							if abs(right_up) == 4:
-								if index:
-									return [int(right_up/4), (i, j), (i-3, j+3)]
-								return int(right_up/4)
-						if DOWN:
-							right_down = 0
-							for n in range(4):
-								right_down += self.board[i+n][j+n]
-							if abs(right_down) == 4:
-								if index:
-									return [int(right_down/4), (i, j), (i+3, j+3)]
-								return int(right_down/4)
-					if LEFT:
-						left = 0
-						for n in range(4):
-							left += self.board[i][j-n]
-						if abs(left) == 4:
-							if index:
-									return [int(left/4), (i, j), (i, j-3)]
-							return int(left/4)
-
-						if UP:
-							left_up = 0
-							for n in range(4):
-								left_up += self.board[i-n][j-n]
-							if abs(left_up) == 4:
-								if index:
-									return [int(left_up/4), (i, j), (i-3, j-3)]
-								return int(left_up/4)
-
-						if DOWN:
-							left_down = 0
-							for n in range(4):
-								left_down += self.board[i+n][j-n]
-							if abs(left_down) == 4:
-								if index:
-									return [int(left_down/4), (i, j), (i+3, j-3)]
-								return int(left_down/4)
-					if UP:
-						up = 0
-						for n in range(4):
-							up += self.board[i-n][j]
-						if abs(up) == 4:
-							if index:
-									return [int(up/4), (i, j), (i-3, j)]
-							return int(up/4)
-
-					if DOWN:
-						down = 0
-						for n in range(4):
-							down += self.board[i+n][j]
-						if abs(down) == 4:
-							if index:
-									return [int(down/4), (i, j), (i+3, j)]
-							return int(down/4)
-		if index:
-			return [3, None, None]
+		#horizontal
+		for c in range(self.columns-3):
+			for r in range(self.rows):
+				if self.board[r][c] == self.board[r][c+1] == self.board[r][c+2] == self.board[r][c+3] != 0:
+					return self.board[r][c]
+		#vertical
+		for c in range(self.columns):
+			for r in range(self.rows-3):
+				if self.board[r][c] == self.board[r+1][c] == self.board[r+2][c] == self.board[r+3][c] != 0:
+					return self.board[r][c]
+		#/diagonal/
+		for c in range(self.columns-3):
+			for r in range(self.rows-3):
+				if self.board[r][c] == self.board[r+1][c+1] == self.board[r+2][c+2] == self.board[r+3][c+3] != 0:
+					return self.board[r][c]
+		#\diagonal\
+		for c in range(self.columns-3):
+			for r in range(3, self.rows):
+				if self.board[r][c] == self.board[r-1][c+1] == self.board[r-2][c+2] == self.board[r-3][c+3] != 0:
+					return self.board[r][c]
 		return 3
 
 if __name__ == '__main__':

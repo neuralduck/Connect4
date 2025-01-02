@@ -15,7 +15,7 @@ def minimax(board, player, depth = 1):
     for move in board.available_moves():
         new_board = deepcopy(board)
         new_board.move(move, player)
-        _, score = minimax(new_board, -player, depth=depth+1)
+        _, score = minimax(new_board, -player, depth=min(depth+2, 5))
         if player == 1:
             if score > best[1]:
                 best = [move, score]
@@ -51,6 +51,7 @@ if __name__ == '__main__':
 		else:
 			board.move(choice, player2)
 		turn = int(not(turn))
+		print('calling check')
 		result = board.check()
 		if result == 1:
 			info()
@@ -62,5 +63,6 @@ if __name__ == '__main__':
 			break
 		elif result == 0:
 			info()
+			print('result reutned zero')
 			print('Draw')
 			break
