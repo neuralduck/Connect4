@@ -28,29 +28,51 @@ class ConnectFour:
 					self.board[cell][column] = mark
 					self.move_count[column] += 1
 					break
-	def value(self):
-		def calculate_value(player):
-			total_value = 0
-			for choice in self.available_moves():
-				directions = {'u': (-1, 0), 'd': (1, 0), 'r': (0, 1), 'l': (0, -1), 'ur': (-1, 1), 'ul': (-1, -1), 'dr': (1, 1), 'dl': (1, -1)}
-				lines = {'u': 0, 'd': 0, 'r': 0, 'l': 0, 'ur': 0, 'ul': 0, 'dr': 0, 'dl': 0}
-				i = 5 - self.move_count[choice]
-				j = choice
-				for dir in directions:
-					m, n = directions[dir]
-					for t in (1, 2, 3):
-						if (0<=(i+t*m)<=5) and (0<=(j+t*n)<=6):
-							if (self.board[i+t*m][j+t*n] == player):
-								lines[dir] += 1
-							else:
-								break
-				choice_value = sum(map(lambda x: x*100 if x == 3 else x*5 if x == 2 else x if x == 1 else 0, filter(lambda x: x>0, lines.values())))
-				total_value += choice_value
-			return total_value * player
+	def get_value(self):
+		value = 0
+		result, *_ = self.check()
+		if result != 3:
+			value += 1000*result
 		
-		p1 = calculate_value(player = 1)
-		p2 = calculate_value(player = -1)
-		return p1 + p2
+		def get_score(window):
+			score = 0
+			match window.count(0):
+				case 1:
+					if window.count(1) == 3:
+						score += 100
+					if window.count(-1) == 3:
+						score += -100
+				case 2:
+					if window.count(1) == 2:
+						score += 50
+					if window.count(-1) == 2:
+						score += -50
+				case _:
+					score += window.count(1) - window.count(-1)
+			return score
+		
+		#horizontal
+		for c in range(self.columns-3):
+			for r in range(self.rows):
+				window = self.board[r][c:c+4]
+				value += get_score(window)
+		#vertical
+		for c in range(self.columns):
+			for r in range(self.rows-3):
+				window = [self.board[r][c], self.board[r+1][c], self.board[r+2][c], self.board[r+3][c]]
+				value += get_score(window)
+		#/diagonal/
+		for c in range(self.columns-3):
+			for r in range(self.rows-3):
+				window = [self.board[r][c], self.board[r+1][c+1],self.board[r+2][c+2], self.board[r+3][c+3]]
+				value += get_score(window)
+		#\diagonal\
+		for c in range(self.columns-3):
+			for r in range(3, self.rows):
+				window = [self.board[r][c], self.board[r-1][c+1], self.board[r-2][c+2], self.board[r-3][c+3]]
+				value += get_score(window)
+		
+		return value
 	
 	def available_moves(self):
 		#returns a list of column numbers with empty cells
@@ -63,28 +85,28 @@ class ConnectFour:
 	def check(self):
 		# +1 player 1 | -1 player 2 | 0 draw | 3 game not over
 		if self.num_cells() == 0:
-			return 0
+			return (0, None, None)
 		#horizontal
 		for c in range(self.columns-3):
 			for r in range(self.rows):
 				if self.board[r][c] == self.board[r][c+1] == self.board[r][c+2] == self.board[r][c+3] != 0:
-					return self.board[r][c]
+					return (self.board[r][c], (r, c), (r, c+3))
 		#vertical
 		for c in range(self.columns):
 			for r in range(self.rows-3):
 				if self.board[r][c] == self.board[r+1][c] == self.board[r+2][c] == self.board[r+3][c] != 0:
-					return self.board[r][c]
+					return (self.board[r][c], (r, c), (r+3, c))
 		#/diagonal/
 		for c in range(self.columns-3):
 			for r in range(self.rows-3):
 				if self.board[r][c] == self.board[r+1][c+1] == self.board[r+2][c+2] == self.board[r+3][c+3] != 0:
-					return self.board[r][c]
+					return (self.board[r][c], (r, c), (r+3, c+3))
 		#\diagonal\
 		for c in range(self.columns-3):
 			for r in range(3, self.rows):
 				if self.board[r][c] == self.board[r-1][c+1] == self.board[r-2][c+2] == self.board[r-3][c+3] != 0:
-					return self.board[r][c]
-		return 3
+					return (self.board[r][c], (r, c), (r-3, c+3))
+		return (3, None, None)
 
 if __name__ == '__main__':
 	def info():

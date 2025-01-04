@@ -82,7 +82,7 @@ class Game:
 				for n, ball in enumerate(self.on_screen[col]):
 					ball.draw(self.screen)
 					ball.update_pos(n)
-			result, start, end = self.board.check(True)
+			result, start, end = self.board.check()
 			#print(result, start, end)
 			
 			#pg.draw.rect(self.screen, 'black', mouse_circle)
