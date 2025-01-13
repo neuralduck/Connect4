@@ -2,26 +2,52 @@ import os
 from copy import deepcopy
 from connect4 import ConnectFour
 
-def minimax(board, player, depth = 1):
+# def minimax(board, player, depth = 1):
+#     if player == 1:
+#         best = [None, -float("inf")]
+#     else:
+#         best = [None, float("inf")]
+#     result, *_ = board.check()
+#     if result in (1, 0, -1):
+#         return [None, result*1000]
+#     if depth == 5:
+#         return [None, board.get_value()]
+#     for move in board.available_moves():
+#         new_board = deepcopy(board)
+#         new_board.move(move, player)
+#         _, score = minimax(new_board, -player, depth+1)
+#         if player == 1:
+#             if score > best[1]:
+#                 best = [move, score]
+#         else:
+#             if score < best[1]:
+#                 best = [move, score]
+#     return best
+
+def minimax(board, player, depth=1, alpha=-float("inf"), beta=float("inf")):
     if player == 1:
         best = [None, -float("inf")]
     else:
         best = [None, float("inf")]
     result, *_ = board.check()
-    if result in (1, 0, -1):
-        return [None, result*1000]
-    if depth == 5:
+    if result in (1, 0, -1):  # Win, loss, or draw
+        return [None, result * 1000]
+    if depth == 6:
         return [None, board.get_value()]
     for move in board.available_moves():
         new_board = deepcopy(board)
         new_board.move(move, player)
-        _, score = minimax(new_board, -player, depth=min(depth+2, 5))
+        _, score = minimax(new_board, -player, depth + 1, alpha, beta)
         if player == 1:
             if score > best[1]:
                 best = [move, score]
-        else:
+            alpha = max(alpha, score)
+        else:  # Minimizing player
             if score < best[1]:
                 best = [move, score]
+            beta = min(beta, score)
+        if alpha >= beta:
+            break
     return best
 
 if __name__ == '__main__':
@@ -36,7 +62,7 @@ if __name__ == '__main__':
 		info()
 		print(f"eval: {board.get_value()}")
 		if turn:
-			choice = int(input(f"Player 1 choice ({board.symbol1}): "))
+			choice = int(input(f"Your choice ({board.symbol1}): "))
 		else:
 			#choice = int(input(f"Player 2 choice ({board.symbol2}): "))
 			choice = minimax(board, player2)[0]
@@ -59,7 +85,7 @@ if __name__ == '__main__':
 			break
 		elif result == -1:
 			info()
-			print(f'Player 2 ({board.symbol2}) wins')
+			print(f'Bot({board.symbol2}) wins')
 			break
 		elif result == 0:
 			info()

@@ -28,6 +28,7 @@ class ConnectFour:
 					self.board[cell][column] = mark
 					self.move_count[column] += 1
 					break
+	def undo_move(self): pass
 	def get_value(self):
 		value = 0
 		result, *_ = self.check()
@@ -84,7 +85,7 @@ class ConnectFour:
 
 	def check(self):
 		# +1 player 1 | -1 player 2 | 0 draw | 3 game not over
-		if self.num_cells() == 0:
+		if self.num_cells() == 0: ## this can be done with available_moves
 			return (0, None, None)
 		#horizontal
 		for c in range(self.columns-3):
